@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8>
+  <title>Yodlr Registration Portal</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h1>Yodlr Registration Portal</h1>
+  <form id="signupForm">
+    Email: <input type="email" name="email"></br>
+    <button type="submit">Submit</button>
+  </form>
+  <p>
+    <a href="/admin.html">Admin Page</a>
+  </p>
+
+  <script>
+    $(document).ready(function() {
+      $('#signupForm').submit(function(event) {
+        event.preventDefault(); // Prevent default form submission
+        
+        var formData = $(this).serialize(); // Serialize form data
+        
+        $.ajax({
+          type: 'POST',
+          url: '/users', // Endpoint to send data
+          data: formData,
+          success: function(response) {
+            // Handle success
+            console.log('User registered successfully:', response);
+            // Optionally, perform actions upon successful registration
+          },
+          error: function(xhr, status, error) {
+            // Handle error
+            console.error('Error registering user:', error);
+            // Optionally, display an error message to the user
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
