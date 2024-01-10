@@ -1,42 +1,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset=utf-8>
+  <meta charset="utf-8">
   <title>Yodlr Registration Portal</title>
+  <link rel="stylesheet" href="/css/styles.css">
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    h1 {
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .input-group {
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    label {
+      margin-bottom: 5px;
+    }
+    input {
+      width: 200px; /* Adjust as needed */
+      padding: 5px;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+    button {
+      padding: 8px 15px;
+      border-radius: 3px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    p {
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
   <h1>Yodlr Registration Portal</h1>
+  
+  <!-- Form for user registration -->
   <form id="signupForm">
-    Email: <input type="email" name="email"></br>
-    <button type="submit">Submit</button>
+    Email: <input type="email" name="email" id="emailInput"><br>
+    First Name: <input type="text" name="firstName" id="firstNameInput"><br>
+    Last Name: <input type="text" name="lastName" id="lastNameInput"><br>
+    <button type="submit">Submit</button> <!-- Submit button for form -->
   </form>
+  
+  <!-- Link to the index.html page -->
   <p>
-    <a href="/admin.html">Admin Page</a>
+    <a href="/index.html">Back to Main Page</a>
   </p>
 
   <script>
     $(document).ready(function() {
+      // jQuery ready function to execute code after the document loads
+      
+      // Event listener for form submission
       $('#signupForm').submit(function(event) {
         event.preventDefault(); // Prevent default form submission
         
-        var formData = $(this).serialize(); // Serialize form data
-        
-        $.ajax({
-          type: 'POST',
-          url: '/users', // Endpoint to send data
-          data: formData,
-          success: function(response) {
-            // Handle success
-            console.log('User registered successfully:', response);
-            // Optionally, perform actions upon successful registration
-          },
-          error: function(xhr, status, error) {
-            // Handle error
-            console.error('Error registering user:', error);
-            // Optionally, display an error message to the user
-          }
-        });
+        // Serialize form data into a query string
+        var formData = $(this).serialize();
+    
+ // AJAX request to send form data to the server
+$.ajax({
+  type: 'POST',
+  url: '/users', // Endpoint to send user registration data
+  contentType: 'application/json', // Set content type to JSON
+  data: JSON.stringify({
+    email: $('#emailInput').val(),
+    firstName: $('#firstNameInput').val(),
+    lastName: $('#lastNameInput').val(),
+    state: 'pending' // Optional: Set default state if needed
+  }),
+  success: function(response) {
+    // Handle success response
+    console.log('User registered successfully:', response);
+    window.location.href = '/userLogin.html'; // Redirect to userLogin.html
+    // Optionally, perform actions upon successful registration
+  },
+  error: function(xhr, status, error) {
+    // Handle error
+    console.error('Error registering user:', error);
+    // Optionally, display an error message to the user
+  }
+});
       });
     });
   </script>

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>User Login</title>
+  <link rel="stylesheet" href="/css/styles.css"> <!-- Link your CSS file here -->
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      text-align: center;
+      border: 2px solid #ccc;
+      padding: 20px;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    input {
+      width: 200px; /* Adjust as needed */
+      padding: 5px;
+      border-radius: 3px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    button {
+      padding: 8px 15px;
+      border-radius: 3px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    p {
+      text-align: center;
+      margin-top: 20px;
+    }
+    a {
+      text-decoration: none;
+      color: #007bff;
+    }
+  </style>
+</head>
+<body>
+  <h1>User Login</h1>
+  <h2 style="font-size: 12px; color: red; font-style: italic;">*Account must be activated by <br> admin to log into user account*</h2>
+  <form id="loginForm">
+    Email: <input type="email" name="email" id="emailInput"><br>
+    First Name: <input type="text" name="firstName" id="firstNameInput"><br>
+    Last Name: <input type="text" name="lastName" id="lastNameInput"><br>
+    <button type="submit">Login</button>
+  </form>
+  <p>
+    <a href="/index.html">Back to Main Page</a>
+  </p>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#loginForm').submit(function(event) {
+        event.preventDefault();
+        // Get input values
+        var email = $('#emailInput').val();
+        var firstName = $('#firstNameInput').val();
+        var lastName = $('#lastNameInput').val();
+
+        // Check if the account is not activated or is pending
+        if (email && firstName && lastName) {
+          $.ajax({
+            type: 'POST',
+            url: '/users/login',
+            contentType: 'application/json',
+            data: JSON.stringify({
+              email: email,
+              firstName: firstName,
+              lastName: lastName
+            }),
+            success: function(response) {
+              if (response.loginAllowed) {
+                var userData = response.userData;
+
+                if (userData && userData.id) {
+                  sessionStorage.setItem('loggedInUserId', userData.id);
+                  sessionStorage.setItem('user_' + userData.id, JSON.stringify(userData));
+                  window.location.href = "userProfile.html";
+                } else {
+                  console.error('User data or user ID is missing.');
+                }
+              } else {
+                alert("Account not activated or invalid credentials.");
+              }
+            },
+            error: function(xhr, status, error) {
+              console.error('Error logging in:', error);
+            }
+          });
+        } else {
+          alert("Please fill in all the fields.");
+        }
+      });
+    });
+  </script>
+</body>
+</html>

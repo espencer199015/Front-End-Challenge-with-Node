@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset=utf-8>
+  <meta charset="utf-8">
   <title>Yodlr Admin Page</title>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
@@ -15,46 +15,133 @@
         <th>First Name</th>
         <th>Last Name</th>
         <th>Status</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
       <!-- User data will be populated here -->
     </tbody>
   </table>
-  
+  <p>
+    <a href="/adminLogin.html">Logout</a>
+  </p>
   <script>
     $(document).ready(function() {
       // Make AJAX GET request to fetch user data
       $.ajax({
         type: 'GET',
-        url: '/users', // Endpoint to fetch user data
+        url: '/users',
         success: function(users) {
-          // Handle success
-          renderUsers(users); // Function to render user data in the table
+          renderUsers(users);
         },
         error: function(xhr, status, error) {
-          // Handle error
           console.error('Error fetching user data:', error);
-          // Optionally, display an error message to the user
         }
       });
-
-      function renderUsers(users) {
-        var tableBody = $('#userTable tbody');
-        tableBody.empty(); // Clear existing table rows
-        
-        users.forEach(function(user) {
-          var row = '<tr>' +
-                      '<td>' + user.id + '</td>' +
-                      '<td>' + user.email + '</td>' +
-                      '<td>' + user.firstName + '</td>' +
-                      '<td>' + user.lastName + '</td>' +
-                      '<td>' + user.state + '</td>' +
-                    '</tr>';
-          tableBody.append(row); // Append user data to the table
-        });
-      }
     });
+
+    function renderUsers(users) {
+      var tableBody = $('#userTable tbody');
+      tableBody.empty(); // Clear existing table rows
+
+      users.forEach(function(user) {
+        var row = '<tr>' +
+          '<td>' + user.id + '</td>' +
+          '<td>' + user.email + '</td>' +
+          '<td>' + user.firstName + '</td>' +
+          '<td>' + user.lastName + '</td>' +
+          '<td>' + user.state + '</td>' +
+          '<td>' +
+          '<button class="activate-btn" data-id="' + user.id + '">Activate</button>' +
+          '<button class="deactivate-btn" data-id="' + user.id + '">Deactivate</button>' +
+          '<button class="delete-btn" data-id="' + user.id + '">Delete</button>' +
+          '</td>' +
+          '</tr>';
+        tableBody.append(row); // Append user data to the table
+
+        // Store user data in sessionStorage for each user
+        sessionStorage.setItem('user_' + user.id, JSON.stringify(user));
+      });
+
+      // Event delegation for the dynamically added buttons
+      tableBody.on('click', '.activate-btn', function() {
+        var userId = $(this).data('id');
+        activateUser(userId);
+      });
+
+      tableBody.on('click', '.deactivate-btn', function() {
+        var userId = $(this).data('id');
+        deactivateUser(userId);
+      });
+
+      tableBody.on('click', '.delete-btn', function() {
+        var userId = $(this).data('id');
+        deleteUser(userId);
+      });
+
+      // Set the loggedInUserId in sessionStorage after the user logs in
+      // Replace 'loggedInUserId' with the actual logged-in user's ID
+      sessionStorage.setItem('loggedInUserId', 'loggedInUserId');
+    }
+
+    function deleteUser(userId) {
+      $.ajax({
+        type: 'DELETE',
+        url: '/users/' + userId,
+        success: function(response) {
+          console.log('User deleted:', response);
+          $('#userTable tbody tr').filter(function() {
+            return $(this).find('td:first').text() === userId.toString();
+          }).remove(); // Remove the row from the table upon successful deletion
+        },
+        error: function(xhr, status, error) {
+          console.error('Error deleting user:', error);
+        }
+      });
+    }
+
+    function activateUser(userId) {
+      $.ajax({
+        type: 'PUT',
+        url: '/users/' + userId + '/status',
+        data: JSON.stringify({ state: 'active' }),
+        contentType: 'application/json',
+        success: function(response) {
+          console.log('User activated:', response);
+          updateUserStatus(userId, 'active');
+        },
+        error: function(xhr, status, error) {
+          console.error('Error activating user:', error);
+        }
+      });
+    }
+
+    function deactivateUser(userId) {
+      $.ajax({
+        type: 'PUT',
+        url: '/users/' + userId + '/status',
+        data: JSON.stringify({ state: 'inactive' }),
+        contentType: 'application/json',
+        success: function(response) {
+          console.log('User deactivated:', response);
+          updateUserStatus(userId, 'inactive');
+        },
+        error: function(xhr, status, error) {
+          console.error('Error deactivating user:', error);
+        }
+      });
+    }
+
+    function updateUserStatus(userId, newStatus) {
+      // Find the table row corresponding to the user ID and update the status cell
+      var row = $('#userTable tbody tr').filter(function() {
+        return $(this).find('td:first').text() === userId.toString();
+      });
+
+      if (row.length > 0) {
+        row.find('td:nth-child(5)').text(newStatus); // Update the status cell
+      }
+    }
   </script>
 </body>
 </html>
